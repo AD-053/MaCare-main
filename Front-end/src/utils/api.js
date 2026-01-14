@@ -154,6 +154,11 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  deleteMaternalRecord: () => 
+    apiFetch('/mother/maternal-record', {
+      method: 'DELETE',
+    }),
+
   getMotherAppointments: () => 
     apiFetch('/mother/appointments'),
 
@@ -169,6 +174,11 @@ export const api = {
     apiFetch('/mother/child/register', {
       method: 'POST',
       body: JSON.stringify(childData),
+    }),
+
+  deleteChild: (childId) => 
+    apiFetch(`/mother/child/${childId}`, {
+      method: 'DELETE',
     }),
 
   getVaccineSchedule: (childId) => 
@@ -192,6 +202,55 @@ export const api = {
   // Pregnancy weeks data
   getPregnancyWeeks: () =>
     apiFetch('/mother/pregnancy/weeks'),
+  // Pregnancy Vaccine Tracker
+  createVaccine: (data) => 
+    apiFetch('/mother/vaccines', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getPregnancyVaccines: () => 
+    apiFetch('/mother/vaccines'),
+
+  deleteVaccine: (vaccineId) => 
+    apiFetch(`/mother/vaccines/${vaccineId}`, {
+      method: 'DELETE',
+    }),
+
+  markVaccineCompleted: (vaccineId, data) => 
+    apiFetch(`/mother/vaccines/${vaccineId}/complete`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  resetVaccineStatus: (vaccineId) => 
+    apiFetch(`/mother/vaccines/${vaccineId}/reset`, {
+      method: 'PATCH',
+    }),
+
+  uploadVaccinePDF: (vaccineId, pdfFile) => {
+    const formData = new FormData();
+    formData.append('pdf', pdfFile);
+    
+    return fetch(`${API_BASE_URL}/mother/vaccines/${vaccineId}/upload-pdf`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      },
+      body: formData,
+    }).then(async (response) => {
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'PDF upload failed');
+      }
+      return response.json();
+    });
+  },
+
+  deleteVaccinePDF: (vaccineId) => 
+    apiFetch(`/mother/vaccines/${vaccineId}/delete-pdf`, {
+      method: 'DELETE',
+    }),
 
   // Doctor APIs
   getDoctorDashboard: () => 

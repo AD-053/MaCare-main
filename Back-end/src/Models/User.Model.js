@@ -72,6 +72,11 @@
          type: Date,
          required:true
        },
+
+       BloodGroup:{
+         type: String,
+         enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+       },
        
        DeliveryTime:{
         type:Date
