@@ -154,6 +154,11 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  deleteMaternalRecord: () => 
+    apiFetch('/mother/maternal-record', {
+      method: 'DELETE',
+    }),
+
   getMotherAppointments: () => 
     apiFetch('/mother/appointments'),
 
@@ -169,6 +174,11 @@ export const api = {
     apiFetch('/mother/child/register', {
       method: 'POST',
       body: JSON.stringify(childData),
+    }),
+
+  deleteChild: (childId) => 
+    apiFetch(`/mother/child/${childId}`, {
+      method: 'DELETE',
     }),
 
   getVaccineSchedule: (childId) => 

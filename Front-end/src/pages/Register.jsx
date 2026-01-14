@@ -17,6 +17,7 @@ const Register = ({ onNavigate }) => {
     confirmPassword: '',
     PhoneNumber: '',
     DateOfBirth: '',
+    BloodGroup: '',
     address: '',
     ProfileImage: null,
   });
@@ -53,6 +54,7 @@ const Register = ({ onNavigate }) => {
       submitData.append('PhoneNumber', formData.PhoneNumber);
       submitData.append('Role', userRole);
       submitData.append('DateOfBirth', formData.DateOfBirth);
+      submitData.append('BloodGroup', formData.BloodGroup);
       submitData.append('address', formData.address);
       if (formData.ProfileImage) {
         submitData.append('ProfileImage', formData.ProfileImage);
@@ -265,7 +267,25 @@ const Register = ({ onNavigate }) => {
                       <option value="Other">অন্যান্য</option>
                     </select>
                   </div>
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">রক্তের গ্রুপ</label>
+                    <select 
+                      name="BloodGroup"
+                      value={formData.BloodGroup}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="">নির্বাচন করুন</option>
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
+                    </select>
+                  </div>                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">ঠিকানা *</label>

@@ -10,7 +10,10 @@ const ChildRecordSchema = new mongoose.Schema({
   child: {
     name: { type: String, required: true },
     dob: { type: Date, required: true },
-    gender: { type: String, enum: ["Male", "Female"], required: true }
+    gender: { type: String, enum: ["Male", "Female"], required: true },
+    weight: { type: Number },
+    deliveryType: { type: String, enum: ["Normal", "Cesarean"] },
+    bloodGroup: { type: String, enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] }
   },
 
   growth: [{

@@ -1,18 +1,20 @@
 import React from 'react';
+import { useAuth } from '../utils/AuthContext';
 
 /**
  * Sidebar Component for Dashboards
  * Navigation sidebar for Mother, Doctor, and Midwife dashboards
  */
-const Sidebar = ({ userRole = 'mother' }) => {
+const Sidebar = ({ userRole = 'mother', onNavigate }) => {
+  const { user, logout } = useAuth();
   // Different menu items based on user role
   const motherMenu = [
-    { name: 'ড্যাশবোর্ড', icon: 'home', link: '#dashboard' },
-    { name: 'গর্ভাবস্থা ট্র্যাকার', icon: 'chart', link: '#pregnancy' },
-    { name: 'টিকার সময়সূচী', icon: 'calendar', link: '#vaccine' },
-    { name: 'পুষ্টি পরামর্শ', icon: 'food', link: '#nutrition' },
-    { name: 'মেসেজ', icon: 'message', link: '#messages' },
-    { name: 'জরুরি যোগাযোগ', icon: 'phone', link: '#emergency' },
+    { name: 'ড্যাশবোর্ড', icon: 'home', action: 'dashboard' },
+    { name: 'গর্ভাবস্থা ট্র্যাকার', icon: 'chart', action: 'pregnancy' },
+    { name: 'টিকার সময়সূচী', icon: 'calendar', action: 'vaccine' },
+    { name: 'পুষ্টি পরামর্শ', icon: 'food', action: 'nutrition' },
+    { name: 'মেসেজ', icon: 'message', action: 'messages' },
+    { name: 'জরুরি যোগাযোগ', icon: 'phone', action: 'emergency' },
   ];
 
   const doctorMenu = [
@@ -34,6 +36,7 @@ const Sidebar = ({ userRole = 'mother' }) => {
       message: <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3.293 3.293 3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />,
       phone: <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />,
       users: <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />,
+      user: <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />,
     };
     return icons[iconName] || icons.home;
   };
@@ -53,35 +56,52 @@ const Sidebar = ({ userRole = 'mother' }) => {
         <ul className="space-y-2">
           {menu.map((item, index) => (
             <li key={index}>
-              <a
-                href={item.link}
-                className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors"
+              <button
+                onClick={() => onNavigate && onNavigate(item.action)}
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                   {getIcon(item.icon)}
                 </svg>
                 <span className="font-medium">{item.name}</span>
-              </a>
+              </button>
             </li>
           ))}
         </ul>
       </nav>
 
       {/* User Profile */}
-      <div className="absolute bottom-0 w-64 p-4 border-t">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold">
-            {userRole === 'mother' ? 'ম' : 'ড'}
-          </div>
+      <div className="absolute bottom-0 w-64 p-4 border-t bg-white">
+        <div 
+          className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+          onClick={() => onNavigate && onNavigate('profile')}
+        >
+          {user?.ProfileImage ? (
+            <img 
+              src={user.ProfileImage} 
+              alt="Profile" 
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold">
+              {user?.FullName?.charAt(0) || (userRole === 'mother' ? 'ম' : 'ড')}
+            </div>
+          )}
           <div className="flex-1">
             <p className="text-sm font-semibold text-gray-900">
-              {userRole === 'mother' ? 'রহিমা খাতুন' : 'ডা. করিম'}
+              {user?.FullName || (userRole === 'mother' ? 'রহিমা খাতুন' : 'ডা. করিম')}
             </p>
-            <button className="text-xs text-gray-600 hover:text-primary-600">
-              লগআউট
-            </button>
+            <p className="text-xs text-gray-500">
+              প্রোফাইল দেখুন
+            </p>
           </div>
         </div>
+        <button 
+          onClick={logout}
+          className="w-full mt-2 text-xs text-gray-600 hover:text-red-600 text-left px-2 py-1 hover:bg-red-50 rounded transition-colors"
+        >
+          লগআউট
+        </button>
       </div>
     </aside>
   );

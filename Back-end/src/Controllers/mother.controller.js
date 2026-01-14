@@ -53,12 +53,27 @@ const addSelfVisit = AsynHandler(async (req, res) => {
 
 // 4. Register child
 const registerChild = AsynHandler(async (req, res) => {
-  const { name, dob, sex } = req.body;
+  const { name, dob, gender, weight, deliveryType, bloodGroup } = req.body;
   const child = await ChildRecord.create({
     motherID: req.user._id,
-    child: { name, dob, sex }
+    child: { name, dob, gender, weight, deliveryType, bloodGroup }
   });
   return res.status(201).json(new ApiResponse(201, child, "Child registered"));
+});
+
+// 4b. Delete child record
+const deleteChild = AsynHandler(async (req, res) => {
+  const { childId } = req.params;
+  
+  const child = await ChildRecord.findById(childId);
+  
+  if (!child || child.motherID.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "Access denied");
+  }
+  
+  await ChildRecord.findByIdAndDelete(childId);
+  
+  return res.status(200).json(new ApiResponse(200, {}, "Child record deleted successfully"));
 });
 
 // 5. View vaccine schedule
@@ -241,7 +256,22 @@ const createMaternalRecord = AsynHandler(async (req, res) => {
   );
 });
 
-// 11. Get all doctor advice for mother
+// 11. Delete maternal record
+const deleteMaternalRecord = AsynHandler(async (req, res) => {
+  const motherID = req.user._id;
+
+  const deleted = await MaternalRecord.findOneAndDelete({ motherID });
+  
+  if (!deleted) {
+    throw new ApiError(404, "Maternal record not found");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, {}, "Maternal record deleted successfully")
+  );
+});
+
+// 12. Get all doctor advice for mother
 const getAllDoctorAdvice = AsynHandler(async (req, res) => {
   const motherID = req.user._id;
 
@@ -305,12 +335,14 @@ export {
     getMaternalRecord,
     addSelfVisit,
     registerChild,
+    deleteChild,
     getVaccineSchedule,
     getMotherDashboard,
     getMotherAppointments,
     getMotherMessages,
     markMessageRead,
     createMaternalRecord,
+    deleteMaternalRecord,
     getAllDoctorAdvice,
     getAllHealthUpdates,
     markAdviceAsRead,
