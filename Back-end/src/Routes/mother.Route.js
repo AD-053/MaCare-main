@@ -17,8 +17,11 @@ import {
   getAllDoctorAdvice,
   getAllHealthUpdates,
   markAdviceAsRead,
-  getMyCheckups
-  , getPregnancyWeeks
+  getMyCheckups,
+  getPregnancyWeeks,
+  saveKickSession,
+  getKickSessions,
+  deleteKickSession
 } from "../Controllers/mother.controller.js";
 
 import {
@@ -54,6 +57,11 @@ router.route('/health-updates').get(jwtVerification, getAllHealthUpdates);
 router.route('/checkups').get(jwtVerification, getMyCheckups);
 // Pregnancy weeks data (static or seeded)
 router.route('/pregnancy/weeks').get(jwtVerification, getPregnancyWeeks);
+
+// Kick Counter routes
+router.route('/kick-counter').post(jwtVerification, saveKickSession);
+router.route('/kick-counter').get(jwtVerification, getKickSessions);
+router.route('/kick-counter/:sessionId').delete(jwtVerification, deleteKickSession);
 
 // Pregnancy Vaccine Tracker routes
 router.route('/vaccines').post(jwtVerification, createVaccine);

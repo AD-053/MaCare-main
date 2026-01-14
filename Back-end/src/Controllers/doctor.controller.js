@@ -518,8 +518,8 @@ const searchMothers = AsynHandler(async (req, res) => {
     const maternalRecord = await MaternalRecord.findOne({ motherID: mother._id });
     
     let pregnancyWeek = null;
-    if (maternalRecord?.LMP) {
-      const daysSinceLMP = Math.floor((Date.now() - new Date(maternalRecord.LMP)) / (1000 * 60 * 60 * 24));
+    if (maternalRecord?.pregnancy?.lmpDate) {
+      const daysSinceLMP = Math.floor((Date.now() - new Date(maternalRecord.pregnancy.lmpDate)) / (1000 * 60 * 60 * 24));
       pregnancyWeek = Math.floor(daysSinceLMP / 7);
     }
     

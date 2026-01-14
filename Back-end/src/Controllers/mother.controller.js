@@ -8,6 +8,7 @@ import { DoctorAdvice } from "../Models/DoctorAdvice.model.js";
 import { HealthRecordUpdate } from "../Models/HealthRecordUpdate.model.js";
 import { CheckupNotification } from "../Models/CheckupNotification.model.js";
 import { MidwifeMotherAssignment } from "../Models/MidwifeMotherAssignment.model.js";
+import { KickCounter } from "../Models/KickCounter.model.js";
 import { ApiError } from "../Utils/ApiError.js";
 import { ApiResponse } from "../Utils/ApiResponse.js";
 import { AsynHandler } from "../Utils/AsyncHandler.js";
@@ -283,7 +284,7 @@ const getAllDoctorAdvice = AsynHandler(async (req, res) => {
 
   const advice = await DoctorAdvice.find({ motherID })
     .populate('doctorID', 'FullName Email PhoneNumber ProfileImage')
-    .populate('relatedHealthUpdate')
+    .populate('relatedHealthRecordID')
     .sort({ createdAt: -1 });
 
   return res.status(200).json(
@@ -363,6 +364,114 @@ const getPregnancyWeeks = AsynHandler(async (req, res) => {
   }
 });
 
+// ==================== KICK COUNTER FUNCTIONALITY ====================
+
+// 1. Save a new kick counter session
+const saveKickSession = AsynHandler(async (req, res) => {
+  const motherID = req.user._id;
+  const { firstKickTime, lastKickTime, kickCount, pregnancyWeek, notes } = req.body;
+
+  // Validate required fields
+  if (!firstKickTime || !lastKickTime || kickCount === undefined) {
+    throw new ApiError(400, "First kick time, last kick time, and kick count are required");
+  }
+
+  // Calculate duration in seconds
+  const first = new Date(firstKickTime);
+  const last = new Date(lastKickTime);
+  const duration = Math.floor((last - first) / 1000);
+
+  if (duration < 0) {
+    throw new ApiError(400, "Last kick time must be after first kick time");
+  }
+
+  // Get pregnancy week if not provided
+  let week = pregnancyWeek;
+  if (!week) {
+    const maternalRecord = await MaternalRecord.findOne({ motherID });
+    if (maternalRecord?.pregnancy?.lmpDate) {
+      const daysSinceLMP = Math.floor((Date.now() - new Date(maternalRecord.pregnancy.lmpDate)) / (1000 * 60 * 60 * 24));
+      week = Math.floor(daysSinceLMP / 7);
+    }
+  }
+
+  const session = await KickCounter.create({
+    motherID,
+    date: new Date(),
+    firstKickTime: first,
+    lastKickTime: last,
+    duration,
+    kickCount: parseInt(kickCount),
+    pregnancyWeek: week,
+    notes: notes || "",
+    sessionCompleted: true
+  });
+
+  return res.status(201).json(
+    new ApiResponse(201, session, "Kick counter session saved successfully")
+  );
+});
+
+// 2. Get all kick counter sessions for a mother
+const getKickSessions = AsynHandler(async (req, res) => {
+  const motherID = req.user._id;
+  const { limit = 50, page = 1, pregnancyWeek } = req.query;
+
+  const filter = { motherID };
+  if (pregnancyWeek) {
+    filter.pregnancyWeek = parseInt(pregnancyWeek);
+  }
+
+  const sessions = await KickCounter.find(filter)
+    .sort({ date: -1, createdAt: -1 })
+    .limit(parseInt(limit))
+    .skip((parseInt(page) - 1) * parseInt(limit));
+
+  const total = await KickCounter.countDocuments(filter);
+
+  // Group sessions by pregnancy week
+  const groupedSessions = sessions.reduce((acc, session) => {
+    const week = session.pregnancyWeek || 0;
+    if (!acc[week]) {
+      acc[week] = [];
+    }
+    acc[week].push(session);
+    return acc;
+  }, {});
+
+  return res.status(200).json(
+    new ApiResponse(200, {
+      sessions,
+      groupedSessions,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / parseInt(limit))
+      }
+    }, "Kick counter sessions fetched successfully")
+  );
+});
+
+// 3. Delete a kick counter session
+const deleteKickSession = AsynHandler(async (req, res) => {
+  const motherID = req.user._id;
+  const { sessionId } = req.params;
+
+  const session = await KickCounter.findOneAndDelete({
+    _id: sessionId,
+    motherID
+  });
+
+  if (!session) {
+    throw new ApiError(404, "Session not found or unauthorized");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, {}, "Kick counter session deleted successfully")
+  );
+});
+
 export {
     getMotherProfile,
     getMaternalRecord,
@@ -380,5 +489,8 @@ export {
     getAllHealthUpdates,
     markAdviceAsRead,
     getMyCheckups,
-    getPregnancyWeeks
+    getPregnancyWeeks,
+    saveKickSession,
+    getKickSessions,
+    deleteKickSession
 }

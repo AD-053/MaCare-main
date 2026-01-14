@@ -9,6 +9,8 @@ import BabyProfileView from '../components/BabyProfileView';
 import PregnancyCalculator from '../components/PregnancyCalculator';
 import PregnancyTracker from './PregnancyTracker';
 import VaccineTracker from '../components/VaccineTracker/VaccineTracker';
+import KickCounter from '../components/KickCounter';
+import KickCounterHistory from '../components/KickCounterHistory';
 import { useAuth } from '../utils/AuthContext';
 import api from '../utils/api';
 
@@ -23,7 +25,7 @@ const MotherDashboard = () => {
   const [maternalRecord, setMaternalRecord] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview'); // overview, advice, health-updates, checkups, profile
+  const [activeTab, setActiveTab] = useState('overview'); // overview, advice, health-updates, kick-counter, checkups, profile
   const [currentPage, setCurrentPage] = useState('dashboard'); // dashboard, profile
   const [profileView, setProfileView] = useState('menu'); // menu, pregnancy, baby, personal, healthcare, createBaby
   const [selectedBaby, setSelectedBaby] = useState(null); // Selected baby for viewing
@@ -288,6 +290,16 @@ const MotherDashboard = () => {
               স্বাস্থ্য আপডেট
             </button>
             <button
+              onClick={() => setActiveTab('kick-counter')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'kick-counter'
+                  ? 'border-primary-500 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              কিক কাউন্টার
+            </button>
+            <button
               onClick={() => setActiveTab('checkups')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'checkups'
@@ -479,6 +491,22 @@ const MotherDashboard = () => {
           <div className="card">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">সমস্ত স্বাস্থ্য আপডেট</h2>
             <HealthUpdatesList />
+          </div>
+        )}
+
+        {/* Kick Counter Tab */}
+        {activeTab === 'kick-counter' && (
+          <div className="space-y-6">
+            <div className="card">
+              <KickCounter 
+                onSessionComplete={() => {
+                  // Optionally refresh history or show success message
+                }}
+              />
+            </div>
+            <div className="card">
+              <KickCounterHistory />
+            </div>
           </div>
         )}
 
