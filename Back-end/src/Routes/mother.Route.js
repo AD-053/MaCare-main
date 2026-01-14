@@ -18,6 +18,7 @@ import {
   getAllHealthUpdates,
   markAdviceAsRead,
   getMyCheckups
+  , getPregnancyWeeks
 } from "../Controllers/mother.controller.js";
 
 import {
@@ -51,6 +52,8 @@ router.route('/doctor-advice').get(jwtVerification, getAllDoctorAdvice);
 router.route('/doctor-advice/:adviceId/read').patch(jwtVerification, markAdviceAsRead);
 router.route('/health-updates').get(jwtVerification, getAllHealthUpdates);
 router.route('/checkups').get(jwtVerification, getMyCheckups);
+// Pregnancy weeks data (static or seeded)
+router.route('/pregnancy/weeks').get(jwtVerification, getPregnancyWeeks);
 
 // Pregnancy Vaccine Tracker routes
 router.route('/vaccines').post(jwtVerification, createVaccine);

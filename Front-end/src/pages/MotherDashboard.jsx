@@ -15,6 +15,7 @@ import api from '../utils/api';
  * Mother Dashboard
  * Main dashboard for pregnant mothers with pregnancy tracking, appointments, and health info
  */
+const MotherDashboard = ({ onNavigate }) => {
 const MotherDashboard = () => {
   const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState(null);
@@ -207,7 +208,7 @@ const MotherDashboard = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-gray-50">
-        <Sidebar userRole="mother" />
+        <Sidebar userRole="mother" onNavigate={onNavigate} />
         <main className="flex-1 p-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500 mx-auto mb-4"></div>
@@ -221,7 +222,7 @@ const MotherDashboard = () => {
   if (error) {
     return (
       <div className="flex min-h-screen bg-gray-50">
-        <Sidebar userRole="mother" />
+        <Sidebar userRole="mother" onNavigate={onNavigate} />
         <main className="flex-1 p-8">
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
             ত্রুটি: {error}
@@ -237,6 +238,7 @@ const MotherDashboard = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
+      <Sidebar userRole="mother" onNavigate={onNavigate} />
       <Sidebar userRole="mother" onNavigate={handleNavigation} />
       
       <main className="flex-1 p-8">
@@ -297,6 +299,11 @@ const MotherDashboard = () => {
           </nav>
         </div>
 
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
+          <>
+            {/* NOTE: tracker is accessible from the sidebar — no extra dashboard button */}
+            {/* Quick Stats */}
             {/* Overview Tab */}
             {activeTab === 'overview' && (
               <>
